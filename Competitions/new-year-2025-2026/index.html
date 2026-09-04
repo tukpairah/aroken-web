@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Письмо Деду Морозу</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2845 50%, #0d1b2a 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 1em;
+            user-select: none;
+            z-index: 1000;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #b8d4ff;
+            font-style: italic;
+        }
+
+        .letter-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .letter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #ff6b6b);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to { background-position: 200% 0; }
+        }
+
+        .greeting {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #ffd93d;
+            font-weight: bold;
+        }
+
+        .letter-text {
+            line-height: 1.8;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            color: #e0e8f0;
+        }
+
+        .letter-text p {
+            margin-bottom: 20px;
+        }
+
+        .wish-section {
+            background: rgba(255, 215, 61, 0.1);
+            border-left: 4px solid #ffd93d;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 10px;
+        }
+
+        .wish-section p {
+            font-style: italic;
+            font-size: 1.15em;
+            line-height: 1.8;
+            color: #ffd93d;
+        }
+
+        .wish-list {
+            list-style: none;
+            margin: 25px 0;
+        }
+
+        .wish-list li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            font-size: 1.05em;
+            transition: transform 0.3s ease;
+        }
+
+        .wish-list li:hover {
+            transform: translateX(10px);
+        }
+
+        .wish-list li::before {
+            content: '❄';
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+            font-size: 1.3em;
+        }
+
+        .signature {
+            text-align: right;
+            margin-top: 40px;
+            font-size: 1.2em;
+            color: #ffd93d;
+            font-style: italic;
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(107, 207, 127, 0.1);
+            border-radius: 10px;
+            font-size: 0.95em;
+            color: #6bcf7f;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .letter-card {
+                padding: 30px 20px;
+            }
+
+            .greeting {
+                font-size: 1.4em;
+            }
+
+            .letter-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>✨ Письмо Деду Морозу ✨</h1>
+            <p>Написано в тишине зимней ночи, под шелест падающего снега</p>
+        </div>
+
+        <div class="letter-card">
+            <div class="greeting">
+                Дорогой Дедушка Мороз,
+            </div>
+
+            <div class="letter-text">
+                <p>
+                    Ещё один год позади. Не ждал чуда — просто продолжал идти. Шёл даже когда 
+                    было тяжело, когда сил почти не оставалось, а цель казалась далёкой. 
+                    Но я не сдавался. Шаг за шагом. День за днём.
+                </p>
+
+                <div class="wish-section">
+                    <p>
+                        <strong>Я прошёл свой путь сам.</strong><br>
+                        Но иногда думаю — может там, наверху,<br>
+                        <span style="color: #ff6b6b;">есть что-то, что на моей стороне?</span>
+                    </p>
+                </div>
+
+                <p>
+                    Не прошу награды. Просто хочу знать: <em>«Я иду правильной дорогой».</em>
+                </p>
+
+                <p style="margin-top: 30px; margin-bottom: 20px; font-size: 1.15em; color: #b8d4ff;">
+                    Если в твоём мешке найдётся место для простых радостей — 
+                    вот что напомнит мне:
+                </p>
+
+                <ul class="wish-list">
+                    <li>что важны мелочи, делающие путь комфортнее,</li>
+                    <li>что детали создают настроение для новых свершений,</li>
+                    <li>что даже в рутине можно найти моменты удовольствия.</li>
+                </ul>
+
+                <div style="margin: 30px 0; padding: 20px; background: rgba(78, 205, 196, 0.08); border-radius: 12px;">
+                    <p style="margin-bottom: 15px; color: #4ecdc4; font-size: 1.05em;">🎁 Мои пожелания:</p>
+                    <ul class="wish-list">
+                        <li>Наушники Apple AirPods Pro</li>
+                        <li>Мышь Logitech G PRO X SUPERLIGHT 2</li>
+                        <li>Клавиатура Montech MKey 75 PRO Freedom</li>
+                    </ul>
+                </div>
+
+                <div class="signature">
+                    <p>С верой не в удачу — а в собственную волю.</p>
+                    <p style="font-size: 1.3em; margin-top: 10px;">Рахат</p>
+                </div>
+            </div>
+
+            <div class="note">
+                ✨ Письмо написано с верой — что даже во тьме упорство не останется незамеченным, а путь будет оплачен дисциплиной и стойкостью. 🎄
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Create snowflakes
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerHTML = ['❄', '❅', '❆'][Math.floor(Math.random() * 3)];
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'em';
+            snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+            snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            document.body.appendChild(snowflake);
+
+            setTimeout(() => {
+                snowflake.remove();
+            }, 10000);
+        }
+
+        setInterval(createSnowflake, 200);
+
+        // Initial burst of snowflakes
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createSnowflake, i * 100);
+        }
+    </script>
+</body>
+</html>
