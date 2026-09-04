@@ -1,0 +1,189 @@
+:root {
+    --general-text: #312C27;
+    --accent-text: #1F1711;
+    --general-bg: #fff9f4;
+    --accent-bg: #FFE0CB;
+    --accent-color: #ffa55c;
+    --input-color: #AC907A;
+    --transition: all .4s;
+    --border-radius: 20px;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+.body {
+    font-family: "Montserrat", "Arial", sans-serif;
+    line-height: 1.5;
+    color: var(--general-text);
+    background: var(--general-bg);
+}
+
+
+.wrapper {
+    min-height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex-grow: 1;
+}
+
+.main__gallery, .main__program, .main__testimonials {
+    margin-bottom: 140px;
+}
+
+.container {
+    max-width: 1310px;
+    margin: 0 auto;
+    padding: 0 15px;
+    height: 100%;
+}
+
+.button {
+    border-radius: 100px;
+    font-weight: 500;
+    height: 62px;
+    background: var(--accent-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: var(--transition);
+    padding: 3px 15px;
+    width: 100%;
+
+    transition: var(--transition);
+}
+
+.button:hover {
+    background: #ff9138;
+}
+
+.body--opened-modal .modal {
+    opacity: 1;
+    visibility: visible;
+
+    transition: all .6s;
+}
+
+.main__about {
+    padding: 140px 0;
+}
+
+.modal {
+    background: #00000070;
+    position: fixed;
+    inset: 0;
+    z-index: 11;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
+    opacity: 0;
+    visibility: hidden;
+}
+
+.modal__window {
+    border-radius: var(--border-radius);
+    background: var(--general-bg);
+    position: relative;
+    padding: 0 60px 60px;
+    width: 428px;
+}
+
+.modal__cancel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    transition: var(--transition);
+}
+
+.modal__cancel path,
+.modal__cancel rect {
+    transition: var(--transition);
+}
+
+.modal__cancel:hover path,
+.modal__cancel:hover rect {
+    stroke: var(--accent-color);
+}
+
+
+.modal__img {
+    margin: -65px 0 15px 12px;
+}
+
+.modal__title {
+    font-size: 42px;
+    line-height: .9;
+    font-family: 'Gabriola';
+    font-weight: 400;
+    margin-bottom: 10px;
+}
+
+.modal__text {
+    margin-bottom: 30px;
+}
+
+.modal__form {
+    position: relative;
+}
+
+.modal__form-label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.field span {
+    position: absolute;
+    top: 0;
+
+    font-size: 11px;
+    line-height: 1.5;
+    top: 12px;
+    left: 28px;
+
+    opacity: 0;
+    visibility: hidden;
+}
+
+.field__form-input {
+    border: 1px solid var(--general-text);
+    border-radius: 100px;
+    padding: 19px 41px 19px 28px;
+    width: 100%;
+
+    transition: var(--transition);
+}
+
+.field__form-input:focus {
+    padding: 26px 41px 12px 28px;
+}
+
+.field__form-input:hover {
+    border-color: var(--accent-color);
+}
+
+.field__form-input::placeholder {
+    color: var(--input-color);;
+    transition: var(--transition);
+}
+
+.field__form-input:hover::placeholder {
+    color: var(--accent-color);
+}
+
+.field__form-input:focus+span {
+    opacity: 1;
+    visibility: visible;
+    transition: var(--transition);
+}
