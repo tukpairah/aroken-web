@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'Futura';
+    src: local('Futura'), local('Futura'),
+        url('/fonts/Futura.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* @font-face {
+    font-family: 'Gabriola';
+    src: local('Gabriola'),
+        url('../fonts/Gabriola.woff2') format('woff2'),
+        url('../fonts/Gabriola.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Futura Regular';
+    src: local('Futura Regular'), local('Futura Regular'),
+        url('../fonts/futura.woff') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+} */

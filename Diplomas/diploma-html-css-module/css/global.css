@@ -1,0 +1,182 @@
+:root {
+    --general-bg: #000000;
+    --general-text: #ffffff;
+    --accent-text: #ba0000;
+    --transition: all .4s;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+.body {
+    font-family: sans-serif;
+    line-height: 1.5;
+    color: var(--general-text);
+    background: var(--general-bg);
+}
+
+.wrapper {
+    min-height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0px 15px;
+    height: 100%;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+
+    border-radius: 36px;
+    border: 1px solid #fff;
+    width: fit-content;
+
+    font-weight: lighter;
+    font-family: sans-serif;
+
+    font-size: 16px;
+}
+
+.button-text {
+    padding-right: 8px;
+}
+
+.hero__inner {
+    margin-bottom: 122px;
+}
+
+.header {
+    margin-bottom: 170px;
+}
+
+.main__essence {
+    margin-bottom: 212px;
+}
+
+.main__testimonials {
+    margin-bottom: 160px;
+}
+
+.main__favorite {
+    margin-bottom: 240px;
+}
+
+.main__brands {
+    margin-bottom: 372px;
+}
+
+.main__best {
+    margin-bottom: 277px;
+}
+
+.main__visionare {
+    margin-bottom: 278px;
+}
+
+.footer {
+    margin-top: 356px;
+}
+
+.footer__inner {
+    margin-top: 130px;
+}
+
+.footer__subscribe {
+    margin-bottom: 31px;
+}
+
+/* =============================== */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.3s ease;
+  z-index: 20;
+}
+
+.modal__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal__window {
+  background: var(--accent-text);
+  border-radius: 10px;
+  padding: 30px 20px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+}
+
+.modal__cancel {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.modal__title {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.modal__text {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.modal__form {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.modal__form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+.modal__form .join__btn {
+  all: unset;
+  background: #fff;
+  color: #000;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 150px;
+}
+
+.join__btn {
+  cursor: pointer;
+}
