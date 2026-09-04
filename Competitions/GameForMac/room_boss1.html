@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Босс: Прокрастинация</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 4px solid #444;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+        }
+
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #dialogBox {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 4px solid #fff;
+            padding: 20px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        #speakerName {
+            font-size: 18px;
+            font-weight: bold;
+            color: #888;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #dialogText {
+            font-size: 17px;
+            line-height: 1.6;
+            min-height: 80px;
+            letter-spacing: 0.5px;
+        }
+
+#inventory {
+    pointer-events: auto;
+}
+
+
+        #dialogPrompt {
+            text-align: right;
+            font-size: 14px;
+            margin-top: 10px;
+            color: #888;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+
+        #battleUI {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 15;
+            padding: 40px;
+        }
+
+        #bossInfo {
+            text-align: center;
+        }
+
+        #bossName {
+            font-size: 32px;
+            color: #888;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        #bossHpBar {
+            width: 400px;
+            height: 30px;
+            background: #2a0000;
+            border: 3px solid #666;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #bossHpFill {
+            height: 100%;
+            background: linear-gradient(to bottom, #666, #333);
+            transition: width 0.5s ease;
+            width: 100%;
+        }
+
+        #bossHpText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        #questionBox {
+            background: rgba(20, 20, 20, 0.9);
+            border: 3px solid #666;
+            padding: 25px;
+            margin-bottom: 20px;
+            min-height: 120px;
+        }
+
+        #questionText {
+            font-size: 19px;
+            line-height: 1.6;
+            color: #fff;
+            text-align: center;
+        }
+
+        #answersBox {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            background: rgba(30, 30, 30, 0.9);
+            color: white;
+            border: 3px solid #666;
+            padding: 15px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            background: rgba(60, 60, 60, 0.9);
+            border-color: #999;
+            transform: translateX(10px);
+        }
+
+        .answer-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .answer-correct {
+            border-color: #2e8b57 !important;
+            background: rgba(46, 139, 87, 0.3) !important;
+        }
+
+        .answer-wrong {
+            border-color: #cc0000 !important;
+            background: rgba(204, 0, 0, 0.3) !important;
+        }
+
+        #playerBattleHp {
+            text-align: center;
+            padding: 15px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 3px solid #666;
+        }
+
+        #playerBattleHpBar {
+            width: 300px;
+            height: 25px;
+            background: #2a0000;
+            border: 2px solid #666;
+            margin: 10px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #playerBattleHpFill {
+            height: 100%;
+            background: linear-gradient(to bottom, #ff3333, #cc0000);
+            transition: width 0.5s ease;
+            width: 100%;
+        }
+
+        #playerBattleHpText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        #stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px;
+            border: 3px solid #666;
+            font-size: 15px;
+            min-width: 200px;
+        }
+
+        #stats > div {
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .hp-bar {
+            width: 180px;
+            height: 24px;
+            background: #2a0000;
+            border: 2px solid #666;
+            margin-top: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(to bottom, #ff3333, #cc0000);
+            transition: width 0.5s ease;
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .hp-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #inventory {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px;
+            border: 3px solid #666;
+            font-size: 14px;
+            min-width: 180px;
+        }
+
+        .inventory-title {
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .item {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(50, 50, 50, 0.5);
+            border-left: 3px solid #666;
+            padding-left: 8px;
+            font-size: 13px;
+        }
+
+        .item-empty {
+            color: #555;
+            font-style: italic;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 12px;
+            border: 3px solid #666;
+            font-size: 13px;
+            max-width: 220px;
+        }
+
+        .key-hint {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        #gameOverScreen h1 {
+            font-size: 48px;
+            color: #cc0000;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        #gameOverScreen p {
+            font-size: 20px;
+            color: #ccc;
+            margin-bottom: 40px;
+        }
+
+        #gameOverScreen button {
+            padding: 15px 40px;
+            font-size: 20px;
+            font-family: 'Courier New', monospace;
+            background: transparent;
+            color: white;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #gameOverScreen button:hover {
+            background: white;
+            color: black;
+        }
+
+        #victoryScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        #victoryScreen h1 {
+            font-size: 48px;
+            color: #2e8b57;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        #victoryScreen p {
+            font-size: 18px;
+            color: #ccc;
+            margin: 10px 0;
+            max-width: 600px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="vignette"></div>
+
+        <div id="ui">
+            <div id="stats">
+                <div class="stat-label">ИМЯ</div>
+                <div style="font-size: 18px; color: #ffd700; margin-bottom: 10px;">Странник</div>
+                
+                <div class="stat-label">❤️ ЗДОРОВЬЕ</div>
+                <div class="hp-bar">
+                    <div class="hp-fill" id="hpBar" style="width: 100%"></div>
+                    <div class="hp-text"><span id="playerHP">20</span>/<span id="maxHP">20</span></div>
+                </div>
+                
+                <div style="margin-top: 12px;">
+                    <span class="stat-label">⚡ РЕШИМОСТЬ:</span> 
+                    <span style="color: #ffaa00; font-weight: bold;" id="determination">0</span>
+                </div>
+                
+                <div style="margin-top: 8px;">
+                    <span class="stat-label">🕯️ ВОЛЯ:</span> 
+                    <span style="color: #66ccff;" id="will">100</span>%
+                </div>
+            </div>
+
+            <div id="inventory">
+                <div class="inventory-title">📦 ИНВЕНТАРЬ</div>
+                <div id="inventoryItems">
+                    <div class="item item-empty">Пусто</div>
+                    <div class="item item-empty">Пусто</div>
+                    <div class="item item-empty">Пусто</div>
+                </div>
+            </div>
+
+            <div id="instructions">
+                <span class="key-hint">WASD</span> / <span class="key-hint">Стрелки</span> - движение<br>
+                <span class="key-hint">E</span> / <span class="key-hint">Пробел</span> - взаимодействие
+            </div>
+        </div>
+
+        <div id="dialogBox">
+            <div id="speakerName">Прокрастинация</div>
+            <div id="dialogText"></div>
+            <div id="dialogPrompt">▼ Нажми E чтобы продолжить</div>
+        </div>
+
+        <div id="battleUI">
+            <div id="bossInfo">
+                <div id="bossName">ПРОКРАСТИНАЦИЯ</div>
+                <div id="bossHpBar">
+                    <div id="bossHpFill"></div>
+                    <div id="bossHpText"><span id="bossHP">30</span>/30</div>
+                </div>
+            </div>
+
+            <div id="questionBox">
+                <div id="questionText">Готовься к вопросу...</div>
+            </div>
+
+            <div id="answersBox">
+                <button class="answer-btn" onclick="game.selectAnswer(0)">А) Вариант 1</button>
+                <button class="answer-btn" onclick="game.selectAnswer(1)">Б) Вариант 2</button>
+                <button class="answer-btn" onclick="game.selectAnswer(2)">В) Вариант 3</button>
+            </div>
+
+            <div id="playerBattleHp">
+                <div style="color: #aaa; font-size: 14px; margin-bottom: 5px;">❤️ ТВОЁ ЗДОРОВЬЕ</div>
+                <div id="playerBattleHpBar">
+                    <div id="playerBattleHpFill"></div>
+                    <div id="playerBattleHpText"><span id="playerBattleHP">20</span>/20</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen">
+            <h1>ТЫ ПРОИГРАЛ</h1>
+            <p>Прокрастинация победила...</p>
+            <p>Но это не конец. Попробуй снова.</p>
+            <button onclick="location.reload()">Начать заново</button>
+        </div>
+
+        <div id="victoryScreen">
+            <h1>ПОБЕДА</h1>
+            <p>"..."</p>
+            <p>"Ты... действительно победил меня."</p>
+            <p>"Но знаешь что? Я вернусь."</p>
+            <p>"Я всегда возвращаюсь."</p>
+            <p style="margin-top: 30px; color: #ffd700;">"Но теперь ты знаешь, как со мной бороться."</p>
+        </div>
+        <div id="preBattleScreen" style="
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.95);
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:30;
+    font-family:'Courier New';
+    text-align:center;
+    padding:40px;
+">
+    <h1 style="font-size:40px; color:#888; margin-bottom:20px;">
+        Перед схваткой
+    </h1>
+
+    <p style="max-width:600px; font-size:18px; color:#ccc; margin-bottom:20px;">
+        Ты стоишь перед Прокрастинацией.<br><br>
+        Она давит на тебя своим мёртвым спокойствием.<br>
+        Это не обычный враг — это ты сам, твоя слабость, твой страх.
+    </p>
+
+    <p style="max-width:600px; font-size:18px; color:#ffd700; margin-bottom:40px;">
+        Вопрос только один:<br>
+        <b>ты действительно готов встретиться с ней лицом к лицу?</b>
+    </p>
+
+    <button id="startBattleBtn" style="
+        padding:15px 40px;
+        background:black;
+        color:white;
+        border:3px solid white;
+        font-size:20px;
+        cursor:pointer;
+        margin:10px;
+    ">Начать бой</button>
+
+    <button id="backBtn" style="
+        padding:12px 30px;
+        background:rgba(0,0,0,0.5);
+        color:#ccc;
+        border:2px solid #666;
+        font-size:16px;
+        cursor:pointer;
+        margin:10px;
+    ">Отступить</button>
+</div>
+
+    </div>
+<audio id="bgMusic" src="Berserk3.mp3" preload="auto" loop></audio>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const game = {
+            started: true,
+            mode: 'explore',
+            player: {
+                x: 400,
+                y: 550,
+                speed: 2.5,
+                hp: 20,
+                maxHp: 20,
+                determination: 0,
+                will: 100,
+                inventory: []
+            },
+            boss: {
+                x: 400,
+                y: 200,
+                hp: 30,
+                maxHp: 30,
+                name: 'Прокрастинация',
+                emoji: '😴',
+                scale: 2.5,
+                float: 0
+            },
+            keys: {},
+            doors: [],
+            dialogs: {},
+            currentDialog: null,
+            dialogIndex: 0,
+            textSpeed: 50,
+            currentText: '',
+            targetText: '',
+            textTimer: null,
+            battleStarted: false,
+            currentQuestion: 0,
+            questions: [
+                {
+                    text: "Что нужно сделать первым делом, если чувствуешь падение продуктивности?",
+                    answers: [
+                        "А) Забить",
+                        "Б) Отдохнуть 5 минут и вернуться",
+                        "В) Начать новую задачу"
+                    ],
+                    correct: 1
+                },
+                {
+                    text: "Что помогает начать действие, когда 'лень'?",
+                    answers: [
+                        "А) Сделать самый маленький шаг",
+                        "Б) Ждать вдохновения",
+                        "В) Лечь поспать"
+                    ],
+                    correct: 0
+                },
+                {
+                    text: "Что губит мечты быстрее всего?",
+                    answers: [
+                        "А) Страх",
+                        "Б) Отсутствие плана",
+                        "В) Постоянное откладывание"
+                    ],
+                    correct: 2
+                },
+                {
+                    text: "Что делает дисциплину устойчивой?",
+                    answers: [
+                        "А) Сила воли",
+                        "Б) Маленькие привычки ежедневно",
+                        "В) Награды"
+                    ],
+                    correct: 1
+                },
+                {
+                    text: "Что опаснее всего?",
+                    answers: [
+                        "А) Ничего не делать",
+                        "Б) Ошибиться",
+                        "В) Потратить 10 минут"
+                    ],
+                    correct: 0
+                }
+            ]
+        };
+
+        // Загрузка состояния игрока
+        game.loadPlayerState = function() {
+            const saved = localStorage.getItem('playerState');
+            if (saved) {
+                const state = JSON.parse(saved);
+                this.player.maxHp = state.maxHp || 20;
+                this.player.determination = state.determination || 0;
+                this.player.will = state.will || 100;
+                this.player.inventory = state.inventory || [];
+                
+                // ВАЖНО: Восстанавливаем HP до максимума перед боссом
+                this.player.hp = this.player.maxHp;
+                
+                document.getElementById('playerHP').textContent = this.player.hp;
+                document.getElementById('maxHP').textContent = this.player.maxHp;
+                document.getElementById('determination').textContent = this.player.determination;
+                document.getElementById('will').textContent = this.player.will;
+                
+                const hpPercent = (this.player.hp / this.player.maxHp) * 100;
+                document.getElementById('hpBar').style.width = hpPercent + '%';
+                
+                this.updateInventoryUI();
+            }
+        };
+
+// 🎵 Музыка — ставим громкость и автозапуск
+window.addEventListener("DOMContentLoaded", () => {
+    const mus = document.getElementById("bgMusic");
+
+    mus.volume = 0.3;  // ГРОМЧЕ (0.0–1.0)
+
+    // Автоматическое воспроизведение (браузеры требуют клик)
+    mus.play().catch(() => {
+        document.body.addEventListener("click", () => mus.play(), { once: true });
+    });
+});
+
+        // Сохранение состояния
+        game.savePlayerState = function() {
+            const state = {
+                hp: this.player.hp,
+                maxHp: this.player.maxHp,
+                determination: this.player.determination,
+                will: this.player.will,
+                inventory: this.player.inventory
+            };
+            localStorage.setItem('playerState', JSON.stringify(state));
+        };
+
+        // Обновление UI инвентаря
+        game.updateInventoryUI = function() {
+    const container = document.getElementById('inventoryItems');
+    container.innerHTML = '';
+
+    const div = document.createElement('div');
+
+    if (this.player.inventory[0]) {
+        const item = this.player.inventory[0];
+
+        // ссылка
+        if (item.type === 'video') {
+            div.className = 'item';
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.textContent = item.name;
+            a.target = "_blank";
+            a.style.color = "#ffd700";
+            a.style.textDecoration = "none";
+            a.style.cursor = "pointer";
+            div.appendChild(a);
+        } else {
+            div.className = 'item';
+            div.textContent = item.name;
+        }
+    } else {
+        div.className = 'item item-empty';
+        div.textContent = 'Пусто';
+    }
+
+    container.appendChild(div);
+};
+
+
+        // Инициализация мира
+        game.initWorld = function() {
+            // Дверь наверх (закрыта до победы)
+            this.doors = [
+                { x: 400, y: 40, w: 120, h: 30, open: false, target: 'room_boss2.html' }
+            ];
+
+            this.dialogs = {
+                boss: [
+                    "...",
+                    "Ну вот… очередной герой.",
+                    "Ты знаешь, сколько таких как ты я видел?",
+                    "Все начинали уверенно… решимо… вдохновлённо.",
+                    "А потом…",
+                    "Они просто… переставали.",
+                    "Всё. Сдавались.",
+                    "Тебя ждёт то же самое.",
+                    "Ну что, проверим?"
+                ]
+            };
+        };
+
+        // Управление
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            game.keys[key] = true;
+            
+            if (key === 'e' || key === ' ') {
+                e.preventDefault();
+                if (game.mode === 'explore') {
+                    game.checkInteraction();
+                } else if (game.mode === 'dialog') {
+                    game.advanceDialog();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            game.keys[key] = false;
+        });
+
+        // Проверка взаимодействия
+        game.checkInteraction = function() {
+            // Взаимодействие с боссом
+            if (!this.battleStarted) {
+                const dx = this.player.x - this.boss.x;
+                const dy = this.player.y - this.boss.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 120) {
+                    this.startBossDialog();
+                    return;
+                }
+            }
+
+            // Взаимодействие с дверью
+            for (let door of this.doors) {
+                if (!door.open) continue;
+                const dx = Math.abs(this.player.x - door.x);
+                const dy = Math.abs(this.player.y - door.y);
+                if (dx < door.w/2 + 30 && dy < door.h/2 + 30) {
+                    this.savePlayerState();
+                    window.location.href = door.target;
+                    return;
+                }
+            }
+        };
+
+        // Начало диалога с боссом
+        // Передбоевое окно
+game.startBossDialog = function() {
+    // Показать окно «Перед схваткой»
+    document.getElementById('preBattleScreen').style.display = 'flex';
+
+    // Пока окно открыто — движение и взаимодействие выключены
+    this.mode = 'pause';
+};
+
+
+        game.showDialogText = function() {
+            const dialogKey = this.currentDialog.type;
+            const dialogs = this.dialogs[dialogKey];
+            
+            if (this.dialogIndex < dialogs.length) {
+                this.targetText = dialogs[this.dialogIndex];
+                this.currentText = '';
+                this.typeText();
+            }
+        };
+
+        game.typeText = function() {
+            if (this.currentText.length < this.targetText.length) {
+                this.currentText = this.targetText.substring(0, this.currentText.length + 1);
+                document.getElementById('dialogText').textContent = this.currentText;
+                
+                this.textTimer = setTimeout(() => this.typeText(), this.textSpeed);
+            }
+        };
+
+        game.advanceDialog = function() {
+            if (this.currentText.length < this.targetText.length) {
+                clearTimeout(this.textTimer);
+                this.currentText = this.targetText;
+                document.getElementById('dialogText').textContent = this.currentText;
+                return;
+            }
+            
+            this.dialogIndex++;
+            const dialogKey = this.currentDialog.type;
+            const dialogs = this.dialogs[dialogKey];
+            
+            if (this.dialogIndex < dialogs.length) {
+                this.showDialogText();
+            } else {
+                this.endDialog();
+            }
+        };
+
+        game.endDialog = function() {
+            document.getElementById('dialogBox').style.display = 'none';
+            this.currentDialog = null;
+            
+            // Запуск боя
+            this.startBattle();
+        };
+
+        // Начало боя
+        game.startBattle = function() {
+            this.mode = 'battle';
+            this.battleStarted = true;
+            this.currentQuestion = 0;
+            
+            document.getElementById('battleUI').style.display = 'flex';
+            
+            // Синхронизация HP
+            document.getElementById('playerBattleHP').textContent = this.player.hp;
+            document.getElementById('playerBattleHpFill').style.width = 
+                (this.player.hp / this.player.maxHp * 100) + '%';
+            
+            this.showQuestion();
+        };
+
+        // Показ вопроса
+        game.showQuestion = function() {
+            if (this.currentQuestion >= this.questions.length) {
+                this.victory();
+                return;
+            }
+            
+            const q = this.questions[this.currentQuestion];
+            document.getElementById('questionText').textContent = q.text;
+            
+            const btns = document.querySelectorAll('.answer-btn');
+            btns.forEach((btn, i) => {
+                btn.textContent = q.answers[i];
+                btn.disabled = false;
+                btn.className = 'answer-btn';
+            });
+        };
+
+        // Выбор ответа
+        game.selectAnswer = function(index) {
+            const q = this.questions[this.currentQuestion];
+            const btns = document.querySelectorAll('.answer-btn');
+            
+            // Отключаем все кнопки
+            btns.forEach(btn => btn.disabled = true);
+            
+            if (index === q.correct) {
+                // Правильный ответ - урон боссу
+                btns[index].classList.add('answer-correct');
+                this.boss.hp = Math.max(0, this.boss.hp - 6);
+                
+                document.getElementById('bossHP').textContent = this.boss.hp;
+                document.getElementById('bossHpFill').style.width = 
+                    (this.boss.hp / this.boss.maxHp * 100) + '%';
+                
+                // Проверка победы
+                if (this.boss.hp <= 0) {
+                    setTimeout(() => this.victory(), 1500);
+                    return;
+                }
+                
+                // Следующий вопрос
+                setTimeout(() => {
+                    this.currentQuestion++;
+                    this.showQuestion();
+                }, 2000);
+                
+            } else {
+                // Неправильный ответ - урон игроку
+                btns[index].classList.add('answer-wrong');
+                btns[q.correct].classList.add('answer-correct');
+                
+                this.player.hp = Math.max(0, this.player.hp - 4);
+                
+                // Обновление HP игрока
+                document.getElementById('playerHP').textContent = this.player.hp;
+                document.getElementById('playerBattleHP').textContent = this.player.hp;
+                
+                const hpPercent = (this.player.hp / this.player.maxHp) * 100;
+                document.getElementById('hpBar').style.width = hpPercent + '%';
+                document.getElementById('playerBattleHpFill').style.width = hpPercent + '%';
+                
+                // Проверка смерти игрока
+                if (this.player.hp <= 0) {
+                    setTimeout(() => this.gameOver(), 1500);
+                    return;
+                }
+                
+                // Следующий вопрос (игрок выжил)
+                setTimeout(() => {
+                    this.currentQuestion++;
+                    this.showQuestion();
+                }, 2000);
+            }
+        };
+
+        // Победа
+        game.victory = function() {
+            document.getElementById('battleUI').style.display = 'none';
+            
+            const screen = document.getElementById('victoryScreen');
+            screen.style.display = 'flex';
+            
+            // Награда
+            this.player.determination += 3;
+            document.getElementById('determination').textContent = this.player.determination;
+            
+            // Открытие двери
+            this.doors.forEach(d => d.open = true);
+            
+            this.savePlayerState();
+            this.mode = 'explore';
+            
+            setTimeout(() => {
+                screen.style.display = 'none';
+            }, 5000);
+        };
+
+        // Поражение
+        game.gameOver = function() {
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        };
+
+        // Игровой цикл
+        let time = 0;
+        function gameLoop() {
+            time += 0.016;
+
+            // Движение игрока (только вне боя)
+            if (game.mode === 'explore') {
+                if (game.keys['w'] || game.keys['arrowup']) {
+                    game.player.y -= game.player.speed;
+                }
+                if (game.keys['s'] || game.keys['arrowdown']) {
+                    game.player.y += game.player.speed;
+                }
+                if (game.keys['a'] || game.keys['arrowleft']) {
+                    game.player.x -= game.player.speed;
+                }
+                if (game.keys['d'] || game.keys['arrowright']) {
+                    game.player.x += game.player.speed;
+                }
+
+                // Границы
+                game.player.x = Math.max(40, Math.min(canvas.width - 40, game.player.x));
+                game.player.y = Math.max(40, Math.min(canvas.height - 40, game.player.y));
+            }
+
+            // Рендер
+            // Фон (тёмный, зловещий)
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Туман/атмосфера
+            const gradient = ctx.createRadialGradient(400, 300, 100, 400, 300, 400);
+            gradient.addColorStop(0, 'rgba(50, 50, 60, 0.1)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Каменный пол
+            ctx.strokeStyle = '#1a1a2e';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 60) {
+                for (let j = 0; j < canvas.height; j += 60) {
+                    ctx.strokeRect(i, j, 60, 60);
+                }
+            }
+
+            // Отрисовка дверей
+            for (let door of game.doors) {
+                if (!door.open) {
+                    ctx.fillStyle = '#4a2b2b';
+                } else {
+                    ctx.fillStyle = '#2e8b57';
+                }
+                ctx.fillRect(door.x - door.w/2, door.y - door.h/2, door.w, door.h);
+                
+                ctx.strokeStyle = door.open ? 'rgba(100, 255, 100, 0.5)' : 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(door.x - door.w/2, door.y - door.h/2, door.w, door.h);
+                
+                if (door.open) {
+                    const dx = Math.abs(game.player.x - door.x);
+                    const dy = Math.abs(game.player.y - door.y);
+                    if (dx < 100 && dy < 100) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                        ctx.font = '16px Courier New';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('[E] Войти', door.x, door.y - 15);
+                        ctx.textAlign = 'left';
+                    }
+                }
+            }
+
+            // Тени
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            if (!game.battleStarted) {
+                ctx.beginPath();
+                ctx.ellipse(game.boss.x, game.boss.y + 60, 40, 15, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.beginPath();
+            ctx.ellipse(game.player.x, game.player.y + 30, 20, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Босс (если не в бою)
+            if (!game.battleStarted) {
+                game.boss.float = Math.sin(time * 1.5) * 15;
+                const offsetY = game.boss.float;
+                
+                ctx.font = `${48 * game.boss.scale}px Arial`;
+                ctx.fillText(game.boss.emoji, 
+                    game.boss.x - 24 * game.boss.scale, 
+                    game.boss.y + offsetY + 16);
+                
+                // Индикатор взаимодействия
+                const dx = game.player.x - game.boss.x;
+                const dy = game.player.y - game.boss.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 120 && game.mode === 'explore') {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.font = '20px Courier New';
+                    ctx.fillText('[E]', game.boss.x - 15, game.boss.y - 80 + offsetY);
+                    
+                    ctx.font = '18px Courier New';
+                    ctx.fillStyle = '#888';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(game.boss.name, game.boss.x, game.boss.y - 110 + offsetY);
+                    ctx.textAlign = 'left';
+                }
+            }
+
+            // Игрок
+            ctx.font = '40px Arial';
+            ctx.fillText('🙂', game.player.x - 20, game.player.y + 20);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Инициализация
+        game.loadPlayerState();
+        game.initWorld();
+        // --- ПЕРЕД БОЕМ ---
+document.getElementById('startBattleBtn').onclick = () => {
+    document.getElementById('preBattleScreen').style.display = 'none';
+
+    // Запускаем диалог с боссом
+    game.mode = 'dialog';
+    game.currentDialog = { type: 'boss', name: 'Прокрастинация' };
+    game.dialogIndex = 0;
+
+    document.getElementById('dialogBox').style.display = 'block';
+    document.getElementById('speakerName').textContent = 'Прокрастинация';
+
+    game.showDialogText();
+};
+
+document.getElementById('backBtn').onclick = () => {
+    // Игрок отвернулся от босса
+    document.getElementById('preBattleScreen').style.display = 'none';
+    game.mode = 'explore';
+};
+
+        gameLoop();
+    </script>
+</body>
+</html>

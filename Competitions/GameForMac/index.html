@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Падение в Подземелье — Сцена 1</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 4px solid #444;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+        }
+
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Диалог */
+        #dialogBox {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.95);
+            border: 4px solid #fff;
+            padding: 20px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        #speakerName {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        #dialogText {
+            font-size: 17px;
+            line-height: 1.6;
+            min-height: 80px;
+            letter-spacing: 0.5px;
+        }
+
+        #dialogPrompt {
+            text-align: right;
+            font-size: 14px;
+            margin-top: 10px;
+            color: #888;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+
+        /* UI */
+        #ui { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; }
+
+        #stats, #inventory {
+            background: rgba(0,0,0,0.85);
+            padding: 15px;
+            border: 3px solid #666;
+            font-size: 14px;
+        }
+
+        #stats { position: absolute; top: 20px; left: 20px; min-width: 200px; }
+        #inventory { position: absolute; top: 20px; right: 20px; min-width: 180px; }
+
+        .stat-label { color: #aaa; font-size: 13px; }
+
+        .hp-bar {
+            width: 180px;
+            height: 24px;
+            background: #2a0000;
+            border: 2px solid #666;
+            margin-top: 5px;
+            position: relative;
+        }
+
+        .hp-fill { height: 100%; background: linear-gradient(to bottom, #ff3333, #cc0000); }
+        .hp-text {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 13px; font-weight: bold;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.85);
+            padding: 12px;
+            border: 3px solid #666;
+            font-size: 13px;
+        }
+
+        /* Intro */
+        #intro {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 100;
+            animation: fadeIn 2s;
+        }
+
+        #intro h1 {
+            font-size: 48px; margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(255,0,0,0.5);
+        }
+
+        #intro p { font-size: 18px; max-width: 600px; text-align: center; margin: 10px 0; color: #ccc; }
+
+        #intro button {
+            margin-top: 40px; padding: 15px 40px;
+            font-size: 20px;
+            background: transparent; border: 3px solid white; color: white;
+            cursor: pointer;
+        }
+
+        .vignette {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+
+<audio id="bgMusic" src="Berserk1.mp3" loop preload="auto"></audio>
+
+<body>
+    <div id="gameContainer">
+
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div class="vignette"></div>
+
+        <!-- ВСТУПЛЕНИЕ -->
+        <div id="intro">
+            <h1>ПОДЗЕМЕЛЬЕ</h1>
+            <p>Ты был на вершине...</p>
+            <p>Но слабина привела тебя сюда.</p>
+            <p>Подземелье Забытых Душ ждёт.</p>
+            <p>Рекомендуется играть со звуком! 😉</p>
+            <button onclick="game.startGame()">▶ Начать путь</button>
+        </div>
+
+        <!-- UI -->
+        <div id="ui">
+
+            <div id="stats">
+                <div class="stat-label">ИМЯ</div>
+                <div style="font-size: 18px; color:#ffd700;">Странник</div>
+
+                <div class="stat-label">❤️ ЗДОРОВЬЕ</div>
+                <div class="hp-bar">
+                    <div class="hp-fill" id="hpBar"></div>
+                    <div class="hp-text"><span id="playerHP">20</span>/20</div>
+                </div>
+
+                <div style="margin-top:12px;"><span class="stat-label">⚡ РЕШИМОСТЬ:</span> <span id="determination">0</span></div>
+                <div style="margin-top:8px;"><span class="stat-label">🕯 ВОЛЯ:</span> <span id="will">100</span>%</div>
+            </div>
+
+            <div id="inventory">
+                <div class="inventory-title">📦 ИНВЕНТАРЬ</div>
+                <div class="item-empty">Пусто</div>
+
+            </div>
+
+            <div id="instructions">
+                <span class="key-hint">Стрелки</span> — движение <br>
+                <span class="key-hint">E</span> / Пробел — взаимодействие<br>
+                <span class="key-hint">Q</span> — пропустить диалог
+            </div>
+
+        </div>
+
+        <!-- Диалог -->
+        <div id="dialogBox">
+            <div id="speakerName"></div>
+            <div id="dialogText"></div>
+            <div id="dialogPrompt">▼ Нажми E чтобы продолжить</div>
+        </div>
+    </div>
+
+    <!-- Кнопка новой игры -->
+    <button onclick="game.newGame()"
+        style="position: fixed; top: 20px; right: 20px; z-index:9999;
+               padding: 10px 20px; background:#111; color:white;
+               border:2px solid #fff; cursor:pointer;">
+        Новая игра
+    </button>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const game = {
+            started: false,
+            mode: "explore",
+
+            player: {
+                x: 200, y: 400,
+                speed: 2.5,
+                hp: 20, maxHp: 20,
+                determination: 0,
+                will: 100,
+            },
+
+            keys: {},
+            npcs: [],
+            doors: [],
+            dialogs: {},
+
+            currentDialog: null,
+            dialogIndex: 0,
+            currentText: "",
+            targetText: "",
+            textTimer: null,
+            textSpeed: 40
+        };
+
+        /* -------------------- NPC + ДИАЛОГИ -------------------- */
+
+        game.initWorld = function() {
+
+            this.npcs = [
+                { x: 600, y: 300, type: "albert", name: "Альберт", emoji: "🧙‍♂️", scale: 1.4 },
+                { x: 400, y: 200, type: "ghost", name: "Забытая Душа", emoji: "👻", scale: 1.2, float: 0 }
+            ];
+
+            this.dialogs = {
+                albert: [
+                    "...","Очнулся, Странник?",
+                    "Я — Альберт. Когда-то я был таким же, как ты.",
+                    "Стоял на вершине. Всё казалось под контролем.",
+                    "Но внутри была слабина.",
+                    "Ты должен пройти путь заново.",
+                    "Первые двери откроются, когда ты готов.",
+                    "...","Иди."
+                ],
+
+                ghost: ["...", "Я пытался выбраться... Не смог...", "Ты должен... За нас всех..."]
+            };
+
+            /* ДВЕРЬ */
+            this.doors = [
+                {
+                    x: 400,
+                    y: 80,
+                    w: 120,
+                    h: 30,
+                    open: false,
+                    targetScene: "room_cafe.html"
+                }
+            ];
+        };
+
+        /* -------------------- ЗАПУСК -------------------- */
+
+        game.startGame = function() {
+
+    // <<< ФОНОВАЯ МУЗЫКА >>>
+    const mus = document.getElementById("bgMusic");
+    mus.volume = 0.5;   // тихий уровень
+    mus.play().catch(() => {
+        document.body.addEventListener("click", () => mus.play(), { once: true });
+    });
+
+    document.getElementById("intro").style.display = "none";
+    this.started = true;
+    this.initWorld();
+};
+
+
+        /* -------------------- ДИАЛОГ -------------------- */
+
+        game.startDialog = function(npc) {
+            this.mode = "dialog";
+            this.currentDialog = npc;
+            this.dialogIndex = 0;
+
+            document.getElementById("dialogBox").style.display = "block";
+            document.getElementById("speakerName").textContent = npc.name;
+
+            this.showDialogText();
+        };
+
+        game.showDialogText = function() {
+            const d = this.dialogs[this.currentDialog.type];
+            this.targetText = d[this.dialogIndex];
+            this.currentText = "";
+            this.typeText();
+        };
+
+        game.typeText = function() {
+            if (this.currentText.length < this.targetText.length) {
+                this.currentText = this.targetText.slice(0, this.currentText.length + 1);
+                document.getElementById("dialogText").textContent = this.currentText;
+
+                this.textTimer = setTimeout(() => this.typeText(), this.textSpeed);
+            }
+        };
+
+        game.advanceDialog = function() {
+            if (this.currentText.length < this.targetText.length) {
+                clearTimeout(this.textTimer);
+                this.currentText = this.targetText;
+                document.getElementById("dialogText").textContent = this.currentText;
+                return;
+            }
+
+            const d = this.dialogs[this.currentDialog.type];
+            this.dialogIndex++;
+
+            if (this.dialogIndex < d.length) {
+                this.showDialogText();
+            } else {
+                this.endDialog();
+            }
+        };
+
+        /* Q — SKIP */
+        game.skipDialog = function() {
+            const npc = this.currentDialog;
+            this.currentDialog = null;
+            this.mode = "explore";
+            document.getElementById("dialogBox").style.display = "none";
+
+            if (npc && npc.type === "albert") {
+                this.doors.forEach(d => d.open = true);
+            }
+        };
+
+        /* Закрытие */
+        game.endDialog = function() {
+            const npc = this.currentDialog;
+
+            this.mode = "explore";
+            document.getElementById("dialogBox").style.display = "none";
+            this.currentDialog = null;
+
+            if (npc && npc.type === "albert") {
+                this.doors.forEach(d => d.open = true);
+            }
+        };
+
+        /* -------------------- ДВЕРИ -------------------- */
+
+        game.loadNextScene = function(scene) {
+            window.location.href = scene;
+        };
+
+        /* -------------------- УПРАВЛЕНИЕ -------------------- */
+
+        document.addEventListener("keydown", (e) => {
+            if (!game.started) return;
+            const key = e.key.toLowerCase();
+
+            /* skip */
+            if (key === "q" && game.mode === "dialog") {
+                e.preventDefault();
+                game.skipDialog();
+                return;
+            }
+
+            game.keys[key] = true;
+
+            if (key === "e" || key === " ") {
+                e.preventDefault();
+
+                if (game.mode === "explore") {
+
+                    /* NPC */
+                    for (let npc of game.npcs) {
+                        const dx = game.player.x - npc.x;
+                        const dy = game.player.y - npc.y;
+                        if (Math.sqrt(dx*dx+dy*dy) < 80) {
+                            game.startDialog(npc);
+                            return;
+                        }
+                    }
+
+                    /* Дверь */
+                    for (let door of game.doors) {
+                        const dx = Math.abs(game.player.x - door.x);
+                        const dy = Math.abs(game.player.y - door.y);
+
+                        if (dx < door.w/2 + 20 && dy < door.h/2 + 20) {
+                            if (door.open) {
+                                game.loadNextScene(door.targetScene);
+                            } else {
+                                alert("Дверь закрыта...");
+                            }
+                            return;
+                        }
+                    }
+
+                } else if (game.mode === "dialog") {
+                    game.advanceDialog();
+                }
+            }
+        });
+
+        document.addEventListener("keyup", (e) => {
+            game.keys[e.key.toLowerCase()] = false;
+        });
+
+        /* -------------------- РЕНДЕР -------------------- */
+
+        let t = 0;
+        function gameLoop() {
+            if (!game.started) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            t += 0.016;
+
+            /* Движение */
+            if (game.mode === "explore") {
+                if (game.keys["arrowup"]) game.player.y -= game.player.speed;
+                if (game.keys["arrowdown"]) game.player.y += game.player.speed;
+                if (game.keys["arrowleft"]) game.player.x -= game.player.speed;
+                if (game.keys["arrowright"]) game.player.x += game.player.speed;
+
+                game.player.x = Math.max(40, Math.min(760, game.player.x));
+                game.player.y = Math.max(40, Math.min(560, game.player.y));
+            }
+
+            ctx.fillStyle = "#0a0a0f";
+            ctx.fillRect(0,0,800,600);
+
+            /* Плитки */
+            ctx.strokeStyle = "#1a1a2e";
+            ctx.lineWidth = 2;
+            for (let i=0; i<800; i+=60)
+                for (let j=0; j<600; j+=60)
+                    ctx.strokeRect(i,j,60,60);
+
+            /* Двери */
+            for (let door of game.doors) {
+                ctx.fillStyle = door.open ? "#2f9e44" : "#532323";
+                ctx.fillRect(door.x-door.w/2, door.y-door.h/2, door.w, door.h);
+
+                ctx.strokeStyle = "rgba(255,255,255,0.15)";
+                ctx.strokeRect(door.x-door.w/2, door.y-door.h/2, door.w, door.h);
+
+                ctx.fillStyle = "#ddd";
+                ctx.font = "15px Courier New";
+                ctx.textAlign = "center";
+                ctx.fillText("Дверь", door.x, door.y - 10);
+                ctx.textAlign = "left";
+            }
+
+            /* NPC */
+            for (let npc of game.npcs) {
+                if (npc.type === "ghost")
+                    npc.float = Math.sin(t*2) * 10;
+
+                ctx.font = `${48*(npc.scale)}px Arial`;
+                ctx.fillText(npc.emoji, npc.x-24, npc.y + (npc.float||0));
+            }
+
+            // Подсказка взаимодействия NPC
+for (let npc of game.npcs) {
+    const dx = game.player.x - npc.x;
+    const dy = game.player.y - npc.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+
+    if (distance < 80 && game.mode === "explore") {
+
+        ctx.font = "16px Courier New";
+        ctx.fillStyle = "#ffd700";
+        ctx.textAlign = "center";
+        ctx.fillText(npc.name, npc.x, npc.y - 60);
+
+        ctx.font = "18px Courier New";
+        ctx.fillStyle = "white";
+        ctx.fillText("[Пробел]", npc.x, npc.y - 35);
+
+        ctx.textAlign = "left";
+    }
+}
+
+
+            /* Игрок */
+            ctx.font = "40px Arial";
+            ctx.fillText("🙂", game.player.x-20, game.player.y+20);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        game.newGame = function() {
+            localStorage.clear();
+            location.reload();
+        };
+
+        gameLoop();
+    </script>
+
+<audio id="bgMusic" src="Berserk1.mp3" loop preload="auto"></audio>
+
+</body>
+</html>
